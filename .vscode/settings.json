@@ -1,0 +1,13 @@
+{
+    "java.project.sourcePaths": [
+        "src"
+    ],
+    "java.project.outputPath": "target/classes",
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.compile.nullAnalysis.mode": "automatic",
+    "java.jdt.ls.java.home": "",
+    "cSpell.words": [
+        "intexpr",
+        "nonterminals"
+    ]
+}

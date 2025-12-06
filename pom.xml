@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>edu.mit.eecs</groupId>
+    <artifactId>intexpr</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>Integer Expression Parser</name>
+    <description>Integer arithmetic expression parser and evaluator</description>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>25</maven.compiler.source>
+        <maven.compiler.target>25</maven.compiler.target>
+        <maven.compiler.release>25</maven.compiler.release>
+    </properties>
+
+    <dependencies>
+        <!-- JUnit 5 for testing - compile scope because tests are in src -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.10.1</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.10.1</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- Parserlib - will be installed as local dependency -->
+        <dependency>
+            <groupId>edu.mit.eecs</groupId>
+            <artifactId>parserlib</artifactId>
+            <version>3.2.0</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <sourceDirectory>src</sourceDirectory>
+        <testSourceDirectory>src</testSourceDirectory>
+        
+        <resources>
+            <resource>
+                <directory>src</directory>
+                <includes>
+                    <include>**/*.g</include>
+                </includes>
+            </resource>
+        </resources>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.12.1</version>
+                <configuration>
+                    <source>25</source>
+                    <target>25</target>
+                    <release>25</release>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.3</version>
+            </plugin>
+        </plugins>
+    </build>
+</project>
