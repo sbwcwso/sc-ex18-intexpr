@@ -1,105 +1,173 @@
 # Integer Expression Parser
 
-一个使用 Java 25 和 Maven 的整数表达式解析器项目。
 
-## 项目说明
+A Java-based integer expression parser project using Java 25 and Maven, with support for basic arithmetic operations.
 
-本项目已从 Eclipse 项目转换为 Maven 项目，可以在 VS Code 中直接使用。
+## Project Overview
 
-## 环境要求
+This project implements a recursive descent parser for integer arithmetic expressions, supporting addition, subtraction, multiplication, and division operations. It has been converted from an Eclipse project to a Maven project for better cross-IDE compatibility.
+
+## Features
+
+- **Four Basic Operations**: Addition (+), Subtraction (-), Multiplication (*), and Division (/)
+- **Operator Precedence**: Multiplication and division have higher precedence than addition and subtraction
+- **Left-to-right Associativity**: Operations of the same precedence are evaluated from left to right
+- **Division by Zero Detection**: Division by zero is detected and throws `ArithmeticException`
+- **Comprehensive Test Suite**: 16 unit tests covering all operations and edge cases
+- **Clean Grammar**: Simplified, readable grammar definition using alternation syntax
+
+## Requirements
 
 - Java 25
 - Maven 3.6+
-- VS Code (推荐安装 Java Extension Pack)
+- VS Code (recommended with Java Extension Pack)
 
-## 项目结构
+## Project Structure
 
 ```
 ex18-intexpr/
 ├── src/
 │   └── intexpr/
-│       ├── IntegerExpression.java      # 表达式接口
-│       ├── IntegerExpressionParser.java # 解析器主类
-│       ├── IntegerExpressionParserTest.java # 测试类
-│       ├── IntegerExpression.g          # 语法定义文件
-│       ├── Number.java                  # 数字表达式
-│       ├── Plus.java                    # 加法表达式
-│       └── Times.java                   # 乘法表达式
+│       ├── IntegerExpression.java          # Expression interface
+│       ├── IntegerExpressionParser.java     # Main parser class
+│       ├── IntegerExpressionParserTest.java # Test suite (16 tests)
+│       ├── IntegerExpression.g              # Grammar definition file
+│       ├── Number.java                      # Number expression
+│       ├── Plus.java                        # Addition expression
+│       ├── Minus.java                       # Subtraction expression
+│       ├── Times.java                       # Multiplication expression
+│       └── Divide.java                      # Division expression with div-by-zero check
 ├── lib/
-│   └── parserlib.jar                    # MIT parserlib 依赖
-├── pom.xml                               # Maven 配置文件
+│   └── parserlib.jar                        # MIT ParserLib dependency
+├── pom.xml                                  # Maven configuration
 └── .vscode/
-    ├── settings.json                     # VS Code Java 设置
-    └── launch.json                       # 调试配置
+    ├── settings.json                        # VS Code Java settings
+    └── launch.json                          # Debug configuration
 ```
 
-## 如何使用
+## Getting Started
 
-### 首次使用 - 安装 parserlib 依赖
+### First-Time Setup - Install ParserLib Dependency
 
-如果是首次克隆项目或清理了本地 Maven 仓库，需要先安装 parserlib.jar 到本地 Maven 仓库：
+If you've just cloned the project or cleared your local Maven repository, install `parserlib.jar` to your local Maven repository:
 
 ```bash
 mvn install:install-file -Dfile=lib/parserlib.jar -DgroupId=edu.mit.eecs -DartifactId=parserlib -Dversion=3.2.0 -Dpackaging=jar
 ```
 
-**注意**：只需要执行一次，之后 Maven 会从本地仓库 (`~/.m2/repository/`) 自动加载。
+**Note**: This only needs to be done once. Maven will automatically load it from the local repository (`~/.m2/repository/`) afterward.
 
-### 编译项目
+### Compile the Project
 
 ```bash
 mvn clean compile
 ```
 
-### 运行主程序
+### Run the Main Program
 
 ```bash
 mvn exec:java -Dexec.mainClass="intexpr.IntegerExpressionParser"
 ```
 
-### 运行测试
+### Run Tests
 
 ```bash
 mvn test
 ```
 
-注意：当前语法文件仅支持加法运算，乘法相关测试会失败。
+Expected output: **Tests run: 16, Failures: 0, Errors: 0, Skipped: 0**
 
-### 打包项目
+### Package the Project
 
 ```bash
-mvn clean package -DskipTests
+mvn clean package
 ```
 
-生成的 JAR 文件位于 `target/intexpr-1.0-SNAPSHOT.jar`
+The generated JAR file will be located at `target/intexpr-1.0-SNAPSHOT.jar`
 
-## VS Code 调试
+## Grammar Definition
 
-项目已配置 VS Code 调试支持：
+The parser uses a simplified grammar defined in `IntegerExpression.g`:
 
-1. 打开 VS Code
-2. 按 F5 或点击"运行和调试"
-3. 选择 "Debug IntegerExpressionParser" 配置
+```
+@skip whitespace {
+    expr ::= sum;
+    sum ::= product (('+' | '-') product)*;
+    product ::= primary (('*' | '/') primary)*;
+    primary ::= number | '(' sum ')';
+}
+number ::= [0-9]+;
+whitespace ::= [ \t\r\n]+;
+```
 
-## 依赖说明
+**Key Design Decisions**:
+- Operator precedence is encoded in the grammar structure (product before sum)
+- Uses alternation syntax `('+' | '-')` for better readability
+- Operator extraction is performed using text-based parsing to work around ParserLib API limitations
 
-- **JUnit Jupiter 5.10.1**: 用于单元测试
-- **MIT Parserlib 3.2.0**: 用于语法解析
-  - JAR 文件位于 `lib/parserlib.jar`
-  - 已通过 `mvn install:install-file` 安装到本地 Maven 仓库
-  - **可以删除 lib 目录**，但建议保留以便其他人使用或重新安装
+## VS Code Debugging
 
-## Maven 转换变更
+The project includes VS Code debug configuration:
 
-1. ✅ 创建了 `pom.xml` 配置文件，使用 Java 25
-2. ✅ 安装 parserlib.jar 到本地 Maven 仓库
-3. ✅ 更新代码以使用 classpath resource 加载语法文件
-4. ✅ 移除 Eclipse 配置文件（.classpath, .project, .settings）
-5. ✅ 配置 VS Code 调试和 Java 支持
-6. ✅ 更新 .gitignore 文件
+1. Open VS Code
+2. Press F5 or click "Run and Debug"
+3. Select "Debug IntegerExpressionParser" configuration
 
-## 注意事项
+## Dependencies
 
-- 语法文件 (`IntegerExpression.g`) 当前仅支持加法和括号，不支持乘法运算
-- 使用 Java 25，确保已安装对应版本的 JDK
-- parserlib 依赖已从 lib/parserlib.jar 安装到本地 Maven 仓库
+- **JUnit Jupiter 5.10.1**: Unit testing framework
+- **MIT ParserLib 3.2.0**: Grammar parsing library
+  - JAR file located at `lib/parserlib.jar`
+  - Installed to local Maven repository via `mvn install:install-file -Dfile=lib/parserlib.jar -DgroupId=edu.mit.eecs -DartifactId=parserlib -Dversion=3.2.0 -Dpackaging=jar`
+  - **The lib directory can be deleted** after installation, but keeping it is recommended for new contributors
+
+## Implementation Details
+
+### Division by Zero Handling
+
+Division by zero is detected at object construction time in the `Divide` class:
+
+```java
+public Divide(IntegerExpression left, IntegerExpression right) {
+    this.left = left;
+    this.right = right;
+    checkRep(); // Throws ArithmeticException if right.value() == 0
+}
+```
+
+### Operator Extraction
+
+Due to ParserLib's `ParseTree.children()` API only returning non-terminal nodes, operator extraction is performed using text-based parsing:
+
+```java
+String fullText = parseTree.text();
+int productStart = fullText.indexOf(productText, currentPos);
+String between = fullText.substring(currentPos, productStart).trim();
+if (between.equals("+")) expression = new Plus(expression, right);
+else if (between.equals("-")) expression = new Minus(expression, right);
+```
+
+## Testing
+
+The test suite includes 16 comprehensive tests covering:
+- Basic operations (addition, subtraction, multiplication, division)
+- Operator precedence
+- Left-to-right associativity
+- Division by zero detection
+- Parenthesized expressions
+- Complex multi-operation expressions
+
+Run tests with: `mvn test`
+
+## Migration from Eclipse
+
+The original source is: https://web.mit.edu/6.031/www/sp21/classes/18-parsers/code.html   
+This project was successfully migrated from Eclipse to Maven:
+
+1. ✅ Created `pom.xml` configuration with Java 25
+2. ✅ Installed parserlib.jar to local Maven repository
+3. ✅ Updated code to load grammar files from classpath resources
+4. ✅ Removed Eclipse configuration files (.classpath, .project, .settings)
+5. ✅ Configured VS Code debugging and Java support
+6. ✅ Updated .gitignore file
+

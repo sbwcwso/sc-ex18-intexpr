@@ -17,10 +17,8 @@ public class IntegerExpressionParser {
      * @throws UnableToParseException if example expression can't be parsed
      */
     public static void main(final String[] args) throws UnableToParseException {
-        String input = "54+(2+ 89)";
-        // String input = "TODO"; // different parse tree, same AST
-        // String input = "TODO"; // different parse tree, different AST, same AST leaf nodes (54, 2, 89 in that order)
-        // String input = "TODO"; // parse tree with fewest possible "primary" nodes, same AST leaf nodes in order
+        // String input = "54+(2+ 89)";
+        String input = "5+ 2+ 8 + 3 * 2 + 10 / 5";
         
         System.out.println(input);
         final IntegerExpression expression = IntegerExpressionParser.parse(input);
@@ -30,7 +28,7 @@ public class IntegerExpressionParser {
 
     // the nonterminals of the grammar
     private static enum IntegerGrammar {
-        EXPR, SUM, PRIMARY, NUMBER, WHITESPACE,
+        EXPR, SUM, PRODUCT, PRIMARY, NUMBER, WHITESPACE,
     }
 
     private static Parser<IntegerGrammar> parser = makeParser();
@@ -94,12 +92,60 @@ public class IntegerExpressionParser {
                 return makeAbstractSyntaxTree(child);
             }
 
-        case SUM: // sum ::= primary ('+' primary)*;
+        case SUM: // sum ::= product ('+' product | '-' product)*;
             {
                 final List<ParseTree<IntegerGrammar>> children = parseTree.children();
                 IntegerExpression expression = makeAbstractSyntaxTree(children.get(0));
-                for (int i = 1; i < children.size(); ++i) {
-                    expression = new Plus(expression, makeAbstractSyntaxTree(children.get(i)));
+                
+                // Extract the full text and find operators between products
+                String fullText = parseTree.text();
+                int currentPos = 0;
+                
+                for (int i = 0; i < children.size(); i++) {
+                    String productText = children.get(i).text();
+                    int productStart = fullText.indexOf(productText, currentPos);
+                    
+                    if (i > 0) {
+                        // Find the operator between previous product and this one
+                        String between = fullText.substring(currentPos, productStart).trim();
+                        IntegerExpression right = makeAbstractSyntaxTree(children.get(i));
+                        if (between.equals("+")) {
+                            expression = new Plus(expression, right);
+                        } else if (between.equals("-")) {
+                            expression = new Minus(expression, right);
+                        }
+                    }
+                    
+                    currentPos = productStart + productText.length();
+                }
+                return expression;
+            }
+
+        case PRODUCT: // product ::= primary ('*' primary | '/' primary)*;
+            {
+                final List<ParseTree<IntegerGrammar>> children = parseTree.children();
+                IntegerExpression expression = makeAbstractSyntaxTree(children.get(0));
+                
+                // Extract the full text and find operators between primaries
+                String fullText = parseTree.text();
+                int currentPos = 0;
+                
+                for (int i = 0; i < children.size(); i++) {
+                    String primaryText = children.get(i).text();
+                    int primaryStart = fullText.indexOf(primaryText, currentPos);
+                    
+                    if (i > 0) {
+                        // Find the operator between previous primary and this one
+                        String between = fullText.substring(currentPos, primaryStart).trim();
+                        IntegerExpression right = makeAbstractSyntaxTree(children.get(i));
+                        if (between.equals("*")) {
+                            expression = new Times(expression, right);
+                        } else if (between.equals("/")) {
+                            expression = new Divide(expression, right);
+                        }
+                    }
+                    
+                    currentPos = primaryStart + primaryText.length();
                 }
                 return expression;
             }
