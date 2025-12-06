@@ -28,7 +28,7 @@ public class IntegerExpressionParser {
 
     // the nonterminals of the grammar
     private static enum IntegerGrammar {
-        EXPR, SUM, PRODUCT, PRIMARY, NUMBER, WHITESPACE,
+        EXPR, SUM, PRODUCT, PRIMARY, ADDOP, MULOP, NUMBER, WHITESPACE,
     }
 
     private static Parser<IntegerGrammar> parser = makeParser();
@@ -92,60 +92,40 @@ public class IntegerExpressionParser {
                 return makeAbstractSyntaxTree(child);
             }
 
-        case SUM: // sum ::= product ('+' product | '-' product)*;
+        case SUM: // sum ::= product (addop product)*;
             {
                 final List<ParseTree<IntegerGrammar>> children = parseTree.children();
                 IntegerExpression expression = makeAbstractSyntaxTree(children.get(0));
                 
-                // Extract the full text and find operators between products
-                String fullText = parseTree.text();
-                int currentPos = 0;
-                
-                for (int i = 0; i < children.size(); i++) {
-                    String productText = children.get(i).text();
-                    int productStart = fullText.indexOf(productText, currentPos);
+                for (int i = 1; i < children.size(); i += 2) {
+                    final ParseTree<IntegerGrammar> operator = children.get(i);
+                    final ParseTree<IntegerGrammar> operand = children.get(i + 1);
+                    final IntegerExpression right = makeAbstractSyntaxTree(operand);
                     
-                    if (i > 0) {
-                        // Find the operator between previous product and this one
-                        String between = fullText.substring(currentPos, productStart).trim();
-                        IntegerExpression right = makeAbstractSyntaxTree(children.get(i));
-                        if (between.equals("+")) {
-                            expression = new Plus(expression, right);
-                        } else if (between.equals("-")) {
-                            expression = new Minus(expression, right);
-                        }
+                    if (operator.text().equals("+")) {
+                        expression = new Plus(expression, right);
+                    } else if (operator.text().equals("-")) {
+                        expression = new Minus(expression, right);
                     }
-                    
-                    currentPos = productStart + productText.length();
                 }
                 return expression;
             }
 
-        case PRODUCT: // product ::= primary ('*' primary | '/' primary)*;
+        case PRODUCT: // product ::= primary (mulop primary)*;
             {
                 final List<ParseTree<IntegerGrammar>> children = parseTree.children();
                 IntegerExpression expression = makeAbstractSyntaxTree(children.get(0));
                 
-                // Extract the full text and find operators between primaries
-                String fullText = parseTree.text();
-                int currentPos = 0;
-                
-                for (int i = 0; i < children.size(); i++) {
-                    String primaryText = children.get(i).text();
-                    int primaryStart = fullText.indexOf(primaryText, currentPos);
+                for (int i = 1; i < children.size(); i += 2) {
+                    final ParseTree<IntegerGrammar> operator = children.get(i);
+                    final ParseTree<IntegerGrammar> operand = children.get(i + 1);
+                    final IntegerExpression right = makeAbstractSyntaxTree(operand);
                     
-                    if (i > 0) {
-                        // Find the operator between previous primary and this one
-                        String between = fullText.substring(currentPos, primaryStart).trim();
-                        IntegerExpression right = makeAbstractSyntaxTree(children.get(i));
-                        if (between.equals("*")) {
-                            expression = new Times(expression, right);
-                        } else if (between.equals("/")) {
-                            expression = new Divide(expression, right);
-                        }
+                    if (operator.text().equals("*")) {
+                        expression = new Times(expression, right);
+                    } else if (operator.text().equals("/")) {
+                        expression = new Divide(expression, right);
                     }
-                    
-                    currentPos = primaryStart + primaryText.length();
                 }
                 return expression;
             }

@@ -7,7 +7,9 @@
     "java.compile.nullAnalysis.mode": "automatic",
     "java.jdt.ls.java.home": "",
     "cSpell.words": [
+        "ADDOP",
         "intexpr",
+        "MULOP",
         "nonterminals"
     ]
 }
